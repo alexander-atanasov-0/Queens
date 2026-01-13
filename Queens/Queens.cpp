@@ -26,12 +26,14 @@ struct Move {
 	int x;
 	int y;
 };
+
 struct Game {
 	Move history[BUFFER_SIZE];
 	int turns;
 	int rows;
 	int cols;
 	char** board;
+	char** backupBoard;
 };
 
 bool strequal(const char* c1, const char* c2) {
@@ -132,6 +134,30 @@ void displayBoard(Game& game) {
 	std::cout << "Player " << (game.turns % 2 ? "2" : "1") << "'s turn\n";
 }
 
+bool boardsEqual(char** board1, char** board2, int rows, int cols) {
+	for (size_t i = 0; i < rows; i++)
+	{
+		for (size_t j = 0; j < cols; j++)
+		{
+			if (board1[i][j] != board2[i][j])
+			{
+				return 0;
+			}
+		}
+	}
+	return 1;
+}
+
+void copyBoard(char** destination, char** origin, int rows, int cols) {
+	for (size_t i = 0; i < rows; i++)
+	{
+		for (size_t j = 0; j < cols; j++)
+		{
+			destination[i][j] = origin[i][j];
+		}
+	}
+}
+
 char** initialiseBoard(int rows, int cols) {
 	char** board = new char* [rows];
 	for (size_t i = 0; i < rows; i++)
@@ -149,8 +175,10 @@ void deallocateGameMemory(Game& game) {
 	for (size_t i = 0; i < game.rows; i++)
 	{
 		delete[] game.board[i];
+		delete[] game.backupBoard[i];
 	}
 	delete[] game.board;
+	delete[] game.backupBoard;
 }
 
 bool hasNextMove(Game& game) {
@@ -168,6 +196,8 @@ bool hasNextMove(Game& game) {
 
 void startGame(Game& game) {
 	displayBoard(game);
+	char** backupBoard = initialiseBoard(game.rows, game.cols);
+	game.backupBoard = backupBoard;
 	while (true) {
 		char input[INPUT_BUFFER];
 		std::cin >> input;
@@ -180,6 +210,7 @@ void startGame(Game& game) {
 				std::cin.clear();
 				continue;
 			}
+			copyBoard(game.backupBoard, game.board, game.rows, game.cols);
 			if (playAt(game, x, y))
 			{
 				displayBoard(game);
@@ -215,7 +246,14 @@ void startGame(Game& game) {
 		}
 		else if (strequal("back", input))
 		{
-
+			if (boardsEqual(game.backupBoard, game.board, game.rows, game.cols))
+			{
+				std::cout << "You cannot recover further!\n";
+				continue;
+			}
+			copyBoard(game.board, game.backupBoard, game.rows, game.cols);
+			game.turns--;
+			displayBoard(game);
 		}
 		else if (strequal("help", input)) {
 			
