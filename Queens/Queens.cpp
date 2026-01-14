@@ -134,6 +134,21 @@ void displayBoard(Game& game) {
 	std::cout << "Player " << (game.turns % 2 ? "2" : "1") << "'s turn\n";
 }
 
+void showFreeCells(Game& game) {
+	std::cout << "Free cells are:\n";
+	for (size_t i = 0; i < game.cols; i++)
+	{
+		for (size_t j = 0; j < game.rows; j++)
+		{
+			if (game.board[j][i] == EMPTY_SPACE)
+			{
+				std::cout << "(" << i << "," << j << ") ";
+			}
+		}
+	}
+	std::cout << "\n";
+}
+
 bool boardsEqual(char** board1, char** board2, int rows, int cols) {
 	for (size_t i = 0; i < rows; i++)
 	{
@@ -238,7 +253,7 @@ void startGame(Game& game) {
 		}
 		else if (strequal("free", input))
 		{
-
+			showFreeCells(game);
 		}
 		else if (strequal("history", input))
 		{
