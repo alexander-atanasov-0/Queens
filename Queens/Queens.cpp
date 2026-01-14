@@ -48,6 +48,20 @@ bool strequal(const char* c1, const char* c2) {
 	return 1;
 }
 
+void writeHistory(Move* history, int currentPlayer, int x, int y) {
+	int index = 0;
+	for (size_t i = 0; i < BUFFER_SIZE; i++)
+	{
+		if (history[i].player == 0)
+		{
+			break;
+		}
+		index++;
+	}
+	Move move = { currentPlayer, x, y };
+	history[index] = move;
+}
+
 void writeMove(Game& game, int x, int y) {
 	int row = y;
 	int col = x;
@@ -79,6 +93,7 @@ void writeMove(Game& game, int x, int y) {
 		game.board[row][i] = currentMarker;
 	}
 	game.board[row][col] = game.turns % 2 == 0 ? '1' : '2';
+	writeHistory(game.history, player, x, y);
 }
 
 bool playAt(Game& game, int x, int y) {
@@ -145,6 +160,19 @@ void showFreeCells(Game& game) {
 				std::cout << "(" << i << "," << j << ") ";
 			}
 		}
+	}
+	std::cout << "\n";
+}
+
+void deleteLastMove(Game& game) {
+	game.history[game.turns - 1] = { 0,0,0 };
+}
+
+void printHistory(Game& game) {
+	for (size_t i = 0; i < game.turns; i++)
+	{
+		Move move = game.history[i];
+		std::cout << "Player " << move.player << "-> (" << move.x << "," << move.y << ") ";
 	}
 	std::cout << "\n";
 }
@@ -233,6 +261,7 @@ void startGame(Game& game) {
 			if (!hasNextMove(game)) {
 				char winner = game.turns % 2 == 0 ? '2' : '1';
 				std::cout << "Player " << winner << " won!\n";
+				printHistory(game);
 				deallocateGameMemory(game);
 				return;
 			}
@@ -257,7 +286,7 @@ void startGame(Game& game) {
 		}
 		else if (strequal("history", input))
 		{
-
+			printHistory(game);
 		}
 		else if (strequal("back", input))
 		{
@@ -267,11 +296,12 @@ void startGame(Game& game) {
 				continue;
 			}
 			copyBoard(game.board, game.backupBoard, game.rows, game.cols);
+			deleteLastMove(game);
 			game.turns--;
 			displayBoard(game);
 		}
 		else if (strequal("help", input)) {
-			
+
 		}
 	}
 }
