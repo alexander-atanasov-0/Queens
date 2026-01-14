@@ -82,7 +82,7 @@ void writeMove(Game& game, int x, int y) {
 		game.board[i][col] = currentMarker;
 		for (int j = 0; j < game.cols; j++)
 		{
-			if (abs(i - col) == abs(j - row))
+			if (abs(i - row) == abs(j - col))
 			{
 				game.board[i][j] = currentMarker;
 			}
