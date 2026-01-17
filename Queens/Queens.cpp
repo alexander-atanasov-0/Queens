@@ -48,6 +48,21 @@ bool strequal(const char* c1, const char* c2) {
 	return 1;
 }
 
+void saveGame(Game& game, char* str) {
+	std::ofstream write("games.txt", std::ios::app);
+	write << "---\n";
+	write << str << "\n";
+	write << game.rows << " " << game.cols << " " << game.turns << "\n";
+	for (size_t i = 0; i < game.turns; i++)
+	{
+		Move move = game.history[i];
+		write << move.player << " " << move.x << " " << move.y << " ";
+	}
+	write << "\n";
+	write.close();
+	std::cout << "Game saved!\n";
+}
+
 void writeHistory(Move* history, int currentPlayer, int x, int y) {
 	int index = 0;
 	for (size_t i = 0; i < BUFFER_SIZE; i++)
@@ -149,6 +164,19 @@ void displayBoard(Game& game) {
 	std::cout << "Player " << (game.turns % 2 ? "2" : "1") << "'s turn\n";
 }
 
+char** initialiseBoard(int rows, int cols) {
+	char** board = new char* [rows];
+	for (size_t i = 0; i < rows; i++)
+	{
+		board[i] = new char[cols];
+		for (size_t j = 0; j < cols; j++)
+		{
+			board[i][j] = EMPTY_SPACE;
+		}
+	}
+	return board;
+}
+
 void showFreeCells(Game& game) {
 	std::cout << "Free cells are:\n";
 	for (size_t i = 0; i < game.cols; i++)
@@ -201,19 +229,6 @@ void copyBoard(char** destination, char** origin, int rows, int cols) {
 	}
 }
 
-char** initialiseBoard(int rows, int cols) {
-	char** board = new char* [rows];
-	for (size_t i = 0; i < rows; i++)
-	{
-		board[i] = new char[cols];
-		for (size_t j = 0; j < cols; j++)
-		{
-			board[i][j] = EMPTY_SPACE;
-		}
-	}
-	return board;
-}
-
 void deallocateGameMemory(Game& game) {
 	for (size_t i = 0; i < game.rows; i++)
 	{
@@ -241,6 +256,7 @@ void startGame(Game& game) {
 	displayBoard(game);
 	char** backupBoard = initialiseBoard(game.rows, game.cols);
 	game.backupBoard = backupBoard;
+	copyBoard(game.backupBoard, game.board, game.rows, game.cols);
 	while (true) {
 		char input[INPUT_BUFFER];
 		std::cin >> input;
@@ -272,6 +288,7 @@ void startGame(Game& game) {
 			std::cin.ignore();
 			char gameName[BUFFER_SIZE];
 			std::cin.getline(gameName, BUFFER_SIZE);
+			saveGame(game, gameName);
 			deallocateGameMemory(game);
 			return;
 		}
@@ -301,9 +318,73 @@ void startGame(Game& game) {
 			displayBoard(game);
 		}
 		else if (strequal("help", input)) {
-
+			std::cout << "+\n";
 		}
 	}
+}
+
+void loadGame() {
+	std::ifstream read("games.txt");
+	char str[BUFFER_SIZE];
+	int gameCount = 0;
+	while (read.getline(str, BUFFER_SIZE))
+	{
+		if (strequal("---", str))
+		{
+			gameCount++;
+			read.getline(str, BUFFER_SIZE);
+			std::cout << gameCount << ". " << str << "\n";
+		}
+	}
+	read.clear();
+	read.seekg(0, std::ios::beg);
+	std::cout << "There are " << gameCount << " saved games found.\n";
+	if (gameCount == 0)
+	{
+		return;
+	}
+	int chosenGame;
+	while (true)
+	{
+		//std::cout << "Enter a number from 1 to " << gameCount << "\n";
+		std::cout << "Enter a number from the list\n";
+		std::cin >> chosenGame;
+		if (std::cin.fail())
+		{
+			std::cin.clear();
+			std::cin.ignore(BUFFER_SIZE, '\n');
+			continue;
+		}
+		if (chosenGame >= 1 && chosenGame <= gameCount)
+		{
+			break;
+		}
+	}
+	gameCount = 0;
+	while (read.getline(str, BUFFER_SIZE))
+	{
+		if (strequal("---", str))
+		{
+			gameCount++;
+		}
+		if (gameCount == chosenGame)
+		{
+			break;
+		}
+	}
+	read.getline(str, BUFFER_SIZE);
+	int rows, cols, turns;
+	read >> rows >> cols >> turns;
+	char** board = initialiseBoard(rows, cols);
+	Game game = { {}, 0, rows, cols, board };
+	for (size_t i = 0; i < turns; i++)
+	{
+		int player, x, y;
+		read >> player >> x >> y;
+		playAt(game, x, y);
+	}
+	read.ignore();
+	startGame(game);
 }
 
 void newGame() {
@@ -336,7 +417,7 @@ void mainMenu() {
 		}
 		else if (strequal("load", input))
 		{
-
+			loadGame();
 		}
 		else if (strequal("help", input))
 		{
