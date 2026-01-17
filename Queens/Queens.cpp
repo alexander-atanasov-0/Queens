@@ -21,6 +21,11 @@ const char PLAYER_1_MARKER = '*';
 const char PLAYER_2_MARKER = '+';
 const char EMPTY_SPACE = ' ';
 
+const char DEFAULT_COLOR[] = "\033[0m";
+const char CYAN_COLOR[] = "\033[0;36m";
+const char BLINKING_YELLOW[] = "\033[1;5;33m";
+const char GREEN_COLOR[] = "\033[1;32m";
+
 struct Move {
 	int player;
 	int x;
@@ -35,6 +40,22 @@ struct Game {
 	char** board;
 	char** backupBoard;
 };
+
+void resetColor() {
+	std::cout << DEFAULT_COLOR;
+}
+
+void setColor1() {
+	std::cout << CYAN_COLOR;
+}
+
+void setColor2() {
+	std::cout << GREEN_COLOR;
+}
+
+void setBlinking() {
+	std::cout << BLINKING_YELLOW;
+}
 
 bool strequal(const char* c1, const char* c2) {
 	if (!c1 || !c2) return 0;
@@ -150,7 +171,16 @@ void displayBoard(Game& game) {
 		for (size_t j = 0; j < game.cols; j++)
 		{
 			std::cout << "| ";
+			if (game.board[i][j] == PLAYER_1_MARKER || game.board[i][j] == '1')
+			{
+				setColor2();
+			}
+			else
+			{
+				setColor1();
+			}
 			std::cout << game.board[i][j];
+			resetColor();
 			std::cout << " ";
 		}
 		std::cout << "|\n";
@@ -276,7 +306,9 @@ void startGame(Game& game) {
 			}
 			if (!hasNextMove(game)) {
 				char winner = game.turns % 2 == 0 ? '2' : '1';
+				setBlinking();
 				std::cout << "Player " << winner << " won!\n";
+				resetColor();
 				printHistory(game);
 				deallocateGameMemory(game);
 				return;
@@ -436,5 +468,6 @@ void mainMenu() {
 
 int main()
 {
+	resetColor();
 	mainMenu();
 }
