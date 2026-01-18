@@ -86,12 +86,10 @@ void showWelcomeBoard() {
 		for (size_t j = 0; j < 9; j++) {
 			std::cout << "| ";
 			if (matrix[i][j] == PLAYER_1_MARKER || matrix[i][j] == '1') {
-				//setSecondaryColor();
 				setBlinkingSecondaryColor();
 			}
 			else {
 				setBlinkingColor();
-				//setPrimaryColor();
 			}
 			std::cout << matrix[i][j];
 			setBoardColor();
@@ -306,6 +304,10 @@ void copyBoard(char** destination, char** origin, int rows, int cols) {
 }
 
 void deallocateGameMemory(Game& game) {
+	if (!game.board || !game.backupBoard)
+	{
+		return;
+	}
 	for (size_t i = 0; i < game.rows; i++) {
 		delete[] game.board[i];
 		delete[] game.backupBoard[i];
@@ -367,7 +369,35 @@ void exitCurrentGame(Game& game) {
 }
 
 void processHelpCommand() {
-	std::cout << "";
+	std::cout
+		<< MAIN_COLOR
+		<< "new N M "
+		<< SECONDARY_COLOR
+		<< "- creates a new board with N columns and M rows\n"
+		<< MAIN_COLOR
+		<< "play X Y "
+		<< SECONDARY_COLOR
+		<< "- puts a queen onto the given coordinates\n"
+		<< MAIN_COLOR
+		<< "back "
+		<< SECONDARY_COLOR
+		<< "- rolls back one turn (you cannot recover more than one move)\n"
+		<< MAIN_COLOR
+		<< "history "
+		<< SECONDARY_COLOR
+		<< "- displays the history of moves that were played in a game\n"
+		<< MAIN_COLOR
+		<< "free "
+		<< SECONDARY_COLOR
+		<< "- displays all cells that are not occupied\n"
+		<< MAIN_COLOR
+		<< "load "
+		<< SECONDARY_COLOR
+		<< "- lists all saved games and makes you choose which one to load and continue playing\n"
+		<< MAIN_COLOR
+		<< "save "
+		<< SECONDARY_COLOR
+		<< "- allows you to save the current game into a file\n";
 }
 
 bool processPlayCommand(Game& game) {
