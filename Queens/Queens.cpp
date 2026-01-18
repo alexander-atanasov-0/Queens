@@ -1,20 +1,19 @@
 /**
-*
-* Solution to course project # 6
-* Introduction to programming course
-* Faculty of Mathematics and Informatics of Sofia University
-* Winter semester 2025/2026
-*
-* @author Aleksandar Atanasov
-* @idnumber 5MI0600592
-* @compiler VCC
-*
-* <file with helper functions>
-*
-*/
-
-#include <iostream>
+ *
+ * Solution to course project # 6
+ * Introduction to programming course
+ * Faculty of Mathematics and Informatics of Sofia University
+ * Winter semester 2025/2026
+ *
+ * @author Aleksandar Atanasov
+ * @idnumber 5MI0600592
+ * @compiler VCC
+ *
+ * <file with helper functions>
+ *
+ */
 #include <fstream>
+#include <iostream>
 const int INPUT_BUFFER = 64;
 const int BUFFER_SIZE = 128;
 const char PLAYER_1_MARKER = '*';
@@ -24,7 +23,8 @@ const char MAIN_COLOR[] = "\033[38;2;255;165;0m";
 const char SECONDARY_COLOR[] = "\033[0;96m";
 const char DEFAULT_COLOR[] = "\033[0m";
 const char BOARD_COLOR[] = "\033[0;90m";
-const char BLINKING_YELLOW[] = "\033[1;5;33m";
+const char BLINKING_PRIMARY_COLOR[] = "\033[1;5;33m";
+const char BLINKING_SECONDARY_COLOR[] = "\033[5;96m";
 
 struct Move {
 	int player;
@@ -45,101 +45,85 @@ void resetColor() {
 	std::cout << DEFAULT_COLOR;
 }
 
-void boardColor() {
+void setBoardColor() {
 	std::cout << BOARD_COLOR;
 }
 
-void mainColor() {
+void setMainColor() {
 	std::cout << MAIN_COLOR;
 }
 
-void setColor1() {
+void setPrimaryColor() {
 	std::cout << MAIN_COLOR;
 }
 
-void setColor2() {
+void setSecondaryColor() {
 	std::cout << SECONDARY_COLOR;
 }
 
-void setBlinking() {
-	std::cout << BLINKING_YELLOW;
+void setBlinkingColor() {
+	std::cout << BLINKING_PRIMARY_COLOR;
+}
+
+void setBlinkingSecondaryColor() {
+	std::cout << BLINKING_SECONDARY_COLOR;
 }
 
 void showWelcomeBoard() {
-	char matrix[2][9] = { {'*' , '1', '*', '+', '*', '+', '*', '*', '*'},
-						  {'*', '+', '*', '+' , '2', '+', '+', '+', '+'} };
-	for (size_t i = 0; i < 2; i++)
-	{
-		boardColor();
+	char matrix[2][9] = { {'*', '1', '*', '+', '*', '+', '*', '*', '*'},
+						 {'*', '+', '*', '+', '2', '+', '+', '+', '+'} };
+	for (size_t i = 0; i < 2; i++) {
+		setBoardColor();
 		std::cout << "  ";
-		for (size_t i = 0; i < 9; i++)
-		{
+		for (size_t i = 0; i < 9; i++) {
 			std::cout << "+---";
 		}
 		std::cout << "+\n";
-		setColor2();
+		setSecondaryColor();
 		std::cout << i;
-		boardColor();
+		setBoardColor();
 		std::cout << (i < 10 ? " " : "");
-		for (size_t j = 0; j < 9; j++)
-		{
+		for (size_t j = 0; j < 9; j++) {
 			std::cout << "| ";
-			if (matrix[i][j] == PLAYER_1_MARKER || matrix[i][j] == '1')
-			{
-				setColor2();
+			if (matrix[i][j] == PLAYER_1_MARKER || matrix[i][j] == '1') {
+				//setSecondaryColor();
+				setBlinkingSecondaryColor();
 			}
-			else
-			{
-				setColor1();
+			else {
+				setBlinkingColor();
+				//setPrimaryColor();
 			}
 			std::cout << matrix[i][j];
-			boardColor();
+			setBoardColor();
 			std::cout << " ";
 		}
 		std::cout << "|\n";
 	}
 	std::cout << "  ";
-	for (size_t i = 0; i < 9; i++)
-	{
+	for (size_t i = 0; i < 9; i++) {
 		std::cout << "+---";
 	}
 	std::cout << "+\n";
 }
 
 void showWelcomeText() {
-	std::cout
-		<< BOARD_COLOR
-		<< "  =========="
-		<< MAIN_COLOR
-		<< "WELCOME TO QUEENS!"
-		<< BOARD_COLOR
-		<< "=========\n"
-		<< SECONDARY_COLOR
-		<< "Start by creating a new board\n"
-		<< "Type "
-		<< MAIN_COLOR
-		<< "new N M "
-		<< SECONDARY_COLOR
+	std::cout << BOARD_COLOR << "  ==========" << MAIN_COLOR
+		<< "WELCOME TO QUEENS!" << BOARD_COLOR << "=========\n"
+		<< SECONDARY_COLOR << "Start by creating a new board\n"
+		<< "Type " << MAIN_COLOR << "new N M " << SECONDARY_COLOR
 		<< "to create a new N x M board\n"
-		<< "Type "
-		<< MAIN_COLOR
-		<< "Play X Y "
-		<< SECONDARY_COLOR
+		<< "Type " << MAIN_COLOR << "Play X Y " << SECONDARY_COLOR
 		<< "to put a queen at (X,Y) position\n"
-		<< "Use "
-		<< MAIN_COLOR
-		<< "help "
-		<< SECONDARY_COLOR
+		<< "Use " << MAIN_COLOR << "help " << SECONDARY_COLOR
 		<< "to show all commands\n"
 		<< MAIN_COLOR;
 }
 
 bool strequal(const char* c1, const char* c2) {
-	if (!c1 || !c2) return 0;
-	for (size_t i = 0; c1[i] | c2[i]; i++)
-	{
-		if (c1[i] != c2[i])
-		{
+	if (!c1 || !c2)
+		return 0;
+	for (size_t i = 0; c1[i] | c2[i]; i++) {
+		if (c1[i] != c2[i]) {
 			return 0;
 		}
 	}
@@ -151,22 +135,20 @@ void saveGame(Game& game, char* str) {
 	write << "---\n";
 	write << str << "\n";
 	write << game.rows << " " << game.cols << " " << game.turns << "\n";
-	for (size_t i = 0; i < game.turns; i++)
-	{
+	for (size_t i = 0; i < game.turns; i++) {
 		Move move = game.history[i];
 		write << move.player << " " << move.x << " " << move.y << " ";
 	}
 	write << "\n";
 	write.close();
 	std::cout << "Game saved!\n";
+	write.close();
 }
 
 void writeHistory(Move* history, int currentPlayer, int x, int y) {
 	int index = 0;
-	for (size_t i = 0; i < BUFFER_SIZE; i++)
-	{
-		if (history[i].player == 0)
-		{
+	for (size_t i = 0; i < BUFFER_SIZE; i++) {
+		if (history[i].player == 0) {
 			break;
 		}
 		index++;
@@ -180,37 +162,28 @@ void writeMove(Game& game, int x, int y) {
 	int col = x;
 	char currentMarker;
 	int player;
-	if (game.turns % 2 == 0)
-	{
+	if (game.turns % 2 == 0) {
 		player = 1;
 		currentMarker = PLAYER_1_MARKER;
 	}
-	else
-	{
+	else {
 		player = 2;
 		currentMarker = PLAYER_2_MARKER;
 	}
-	for (int i = 0; i < game.rows; i++)
-	{
-		if (game.board[i][col] == EMPTY_SPACE)
-		{
+	for (int i = 0; i < game.rows; i++) {
+		if (game.board[i][col] == EMPTY_SPACE) {
 			game.board[i][col] = currentMarker;
 		}
-		for (int j = 0; j < game.cols; j++)
-		{
-			if (abs(i - row) == abs(j - col))
-			{
-				if (game.board[i][j] == EMPTY_SPACE)
-				{
+		for (int j = 0; j < game.cols; j++) {
+			if (abs(i - row) == abs(j - col)) {
+				if (game.board[i][j] == EMPTY_SPACE) {
 					game.board[i][j] = currentMarker;
 				}
 			}
 		}
 	}
-	for (size_t i = 0; i < game.cols; i++)
-	{
-		if (game.board[row][i] == EMPTY_SPACE)
-		{
+	for (size_t i = 0; i < game.cols; i++) {
+		if (game.board[row][i] == EMPTY_SPACE) {
 			game.board[row][i] = currentMarker;
 		}
 	}
@@ -221,13 +194,11 @@ void writeMove(Game& game, int x, int y) {
 bool playAt(Game& game, int x, int y) {
 	int row = y;
 	int col = x;
-	if (row < 0 || row >= game.rows || col < 0 || col >= game.cols)
-	{
+	if (row < 0 || row >= game.rows || col < 0 || col >= game.cols) {
 		std::cout << "Parameter out of range!\n";
 		return 0;
 	}
-	if (game.board[row][col] != EMPTY_SPACE)
-	{
+	if (game.board[row][col] != EMPTY_SPACE) {
 		std::cout << "Cell is occupied\n";
 		return 0;
 	}
@@ -239,60 +210,51 @@ bool playAt(Game& game, int x, int y) {
 void displayBoard(Game& game) {
 	system("cls");
 	std::cout << "    ";
-	mainColor();
-	for (size_t i = 0; i < game.cols; i++)
-	{
+	setMainColor();
+	for (size_t i = 0; i < game.cols; i++) {
 		std::cout << i;
 		std::cout << (i < 10 ? "   " : "  ");
 	}
-	boardColor();
+	setBoardColor();
 	std::cout << "\n";
-	for (size_t i = 0; i < game.rows; i++)
-	{
+	for (size_t i = 0; i < game.rows; i++) {
 		std::cout << "  ";
-		for (size_t i = 0; i < game.cols; i++)
-		{
+		for (size_t i = 0; i < game.cols; i++) {
 			std::cout << "+---";
 		}
 		std::cout << "+\n";
-		mainColor();
+		setMainColor();
 		std::cout << i;
 		std::cout << (i < 10 ? " " : "");
-		boardColor();
-		for (size_t j = 0; j < game.cols; j++)
-		{
+		setBoardColor();
+		for (size_t j = 0; j < game.cols; j++) {
 			std::cout << "| ";
-			if (game.board[i][j] == PLAYER_1_MARKER || game.board[i][j] == '1')
-			{
-				setColor2();
+			if (game.board[i][j] == PLAYER_1_MARKER || game.board[i][j] == '1') {
+				setSecondaryColor();
 			}
-			else
-			{
-				setColor1();
+			else {
+				setPrimaryColor();
 			}
 			std::cout << game.board[i][j];
-			boardColor();
+			setBoardColor();
 			std::cout << " ";
 		}
 		std::cout << "|\n";
 	}
 	std::cout << "  ";
-	for (size_t i = 0; i < game.cols; i++)
-	{
+	for (size_t i = 0; i < game.cols; i++) {
 		std::cout << "+---";
 	}
 	std::cout << "+\n";
-	mainColor();
+	setMainColor();
 	std::cout << "Player " << (game.turns % 2 ? "2" : "1") << "'s turn\n";
 }
 
 char** initialiseBoard(int rows, int cols) {
 	char** board = new char* [rows];
-	for (size_t i = 0; i < rows; i++)
-	{
+	for (size_t i = 0; i < rows; i++) {
 		board[i] = new char[cols];
-		for (size_t j = 0; j < cols; j++)
-		{
+		for (size_t j = 0; j < cols; j++) {
 			board[i][j] = EMPTY_SPACE;
 		}
 	}
@@ -301,12 +263,9 @@ char** initialiseBoard(int rows, int cols) {
 
 void showFreeCells(Game& game) {
 	std::cout << "Free cells are:\n";
-	for (size_t i = 0; i < game.cols; i++)
-	{
-		for (size_t j = 0; j < game.rows; j++)
-		{
-			if (game.board[j][i] == EMPTY_SPACE)
-			{
+	for (size_t i = 0; i < game.cols; i++) {
+		for (size_t j = 0; j < game.rows; j++) {
+			if (game.board[j][i] == EMPTY_SPACE) {
 				std::cout << "(" << i << "," << j << ") ";
 			}
 		}
@@ -315,25 +274,22 @@ void showFreeCells(Game& game) {
 }
 
 void deleteLastMove(Game& game) {
-	game.history[game.turns - 1] = { 0,0,0 };
+	game.history[game.turns - 1] = { 0, 0, 0 };
 }
 
 void printHistory(Game& game) {
-	for (size_t i = 0; i < game.turns; i++)
-	{
+	for (size_t i = 0; i < game.turns; i++) {
 		Move move = game.history[i];
-		std::cout << "Player " << move.player << "-> (" << move.x << "," << move.y << ") ";
+		std::cout << "Player " << move.player << "-> (" << move.x << "," << move.y
+			<< ") ";
 	}
 	std::cout << "\n";
 }
 
 bool boardsEqual(char** board1, char** board2, int rows, int cols) {
-	for (size_t i = 0; i < rows; i++)
-	{
-		for (size_t j = 0; j < cols; j++)
-		{
-			if (board1[i][j] != board2[i][j])
-			{
+	for (size_t i = 0; i < rows; i++) {
+		for (size_t j = 0; j < cols; j++) {
+			if (board1[i][j] != board2[i][j]) {
 				return 0;
 			}
 		}
@@ -342,18 +298,15 @@ bool boardsEqual(char** board1, char** board2, int rows, int cols) {
 }
 
 void copyBoard(char** destination, char** origin, int rows, int cols) {
-	for (size_t i = 0; i < rows; i++)
-	{
-		for (size_t j = 0; j < cols; j++)
-		{
+	for (size_t i = 0; i < rows; i++) {
+		for (size_t j = 0; j < cols; j++) {
 			destination[i][j] = origin[i][j];
 		}
 	}
 }
 
 void deallocateGameMemory(Game& game) {
-	for (size_t i = 0; i < game.rows; i++)
-	{
+	for (size_t i = 0; i < game.rows; i++) {
 		delete[] game.board[i];
 		delete[] game.backupBoard[i];
 	}
@@ -362,16 +315,75 @@ void deallocateGameMemory(Game& game) {
 }
 
 bool hasNextMove(Game& game) {
-	for (size_t i = 0; i < game.rows; i++)
-	{
-		for (size_t j = 0; j < game.cols; j++)
-		{
+	for (size_t i = 0; i < game.rows; i++) {
+		for (size_t j = 0; j < game.cols; j++) {
 			if (game.board[i][j] == EMPTY_SPACE) {
 				return 1;
 			}
 		}
 	}
 	return 0;
+}
+
+bool hasWinner(Game& game) {
+	if (hasNextMove(game)) {
+		return 0;
+	}
+	if (!hasNextMove(game)) {
+		char winner = game.turns % 2 == 0 ? '2' : '1';
+		setBlinkingSecondaryColor();
+		std::cout << "Player " << winner << " won!\n";
+		resetColor();
+		setMainColor();
+		printHistory(game);
+		return 1;
+	}
+}
+
+void processSaveCommand(Game& game) {
+	std::cout << "Game file name:\n";
+	std::cin.ignore();
+	char gameName[BUFFER_SIZE];
+	std::cin.getline(gameName, BUFFER_SIZE);
+	saveGame(game, gameName);
+}
+
+void processBackCommand(Game& game) {
+	if (boardsEqual(game.backupBoard, game.board, game.rows, game.cols)) {
+		std::cout << "You cannot recover further!\n";
+		return;
+	}
+	copyBoard(game.board, game.backupBoard, game.rows, game.cols);
+	deleteLastMove(game);
+	game.turns--;
+	displayBoard(game);
+}
+
+void exitCurrentGame(Game& game) {
+	system("cls");
+	std::cout << "Current game closed. Exit again to close application or create a new board.\n";
+	showWelcomeBoard();
+	showWelcomeText();
+}
+
+void processHelpCommand() {
+	std::cout << "";
+}
+
+bool processPlayCommand(Game& game) {
+	int x, y;
+	std::cin >> x >> y;
+	if (std::cin.fail()) {
+		std::cin.clear();
+		return 0;
+	}
+	copyBoard(game.backupBoard, game.board, game.rows, game.cols);
+	if (playAt(game, x, y)) {
+		displayBoard(game);
+	}
+	if (hasWinner(game)) {
+		return 1;
+	}
 }
 
 void startGame(Game& game) {
@@ -382,133 +394,101 @@ void startGame(Game& game) {
 	while (true) {
 		char input[INPUT_BUFFER];
 		std::cin >> input;
-		if (strequal("play", input))
-		{
-			int x, y;
-			std::cin >> x >> y;
-			if (std::cin.fail())
-			{
-				std::cin.clear();
-				continue;
-			}
-			copyBoard(game.backupBoard, game.board, game.rows, game.cols);
-			if (playAt(game, x, y))
-			{
-				displayBoard(game);
-			}
-			if (!hasNextMove(game)) {
-				char winner = game.turns % 2 == 0 ? '2' : '1';
-				setBlinking();
-				std::cout << "Player " << winner << " won!\n";
-				mainColor();
-				printHistory(game);
+		if (strequal("play", input)) {
+			bool gameEnded = processPlayCommand(game);
+			if (gameEnded) {
 				deallocateGameMemory(game);
 				return;
 			}
 		}
-		else if (strequal("save", input))
-		{
-			std::cout << "Game file name:\n";
-			std::cin.ignore();
-			char gameName[BUFFER_SIZE];
-			std::cin.getline(gameName, BUFFER_SIZE);
-			saveGame(game, gameName);
+		else if (strequal("save", input)) {
+			processSaveCommand(game);
 			deallocateGameMemory(game);
 			return;
 		}
 		else if (strequal("exit", input)) {
+			exitCurrentGame(game);
 			deallocateGameMemory(game);
-			std::cout << "Current game closed. Exit again to close application\n";
 			return;
 		}
-		else if (strequal("free", input))
-		{
+		else if (strequal("free", input)) {
 			showFreeCells(game);
 		}
-		else if (strequal("history", input))
-		{
+		else if (strequal("history", input)) {
 			printHistory(game);
 		}
-		else if (strequal("back", input))
-		{
-			if (boardsEqual(game.backupBoard, game.board, game.rows, game.cols))
-			{
-				std::cout << "You cannot recover further!\n";
-				continue;
-			}
-			copyBoard(game.board, game.backupBoard, game.rows, game.cols);
-			deleteLastMove(game);
-			game.turns--;
-			displayBoard(game);
+		else if (strequal("back", input)) {
+			processBackCommand(game);
 		}
 		else if (strequal("help", input)) {
-			std::cout << "+\n";
+			processHelpCommand();
 		}
 	}
 }
 
-void loadGame() {
-	std::ifstream read("games.txt");
+int countAndListSavedGames(std::ifstream& reader) {
 	char str[BUFFER_SIZE];
 	int gameCount = 0;
-	while (read.getline(str, BUFFER_SIZE))
-	{
-		if (strequal("---", str))
-		{
+	while (reader.getline(str, BUFFER_SIZE)) {
+		if (strequal("---", str)) {
 			gameCount++;
-			read.getline(str, BUFFER_SIZE);
+			reader.getline(str, BUFFER_SIZE);
 			std::cout << gameCount << ". " << str << "\n";
 		}
 	}
-	read.clear();
-	read.seekg(0, std::ios::beg);
-	std::cout << "There are " << gameCount << " saved games found.\n";
-	if (gameCount == 0)
-	{
-		return;
-	}
+	reader.clear();
+	return gameCount;
+}
+
+int chooseGame(std::ifstream& reader, int gameCount) {
+	reader.seekg(0, std::ios::beg);
 	int chosenGame;
-	while (true)
-	{
-		//std::cout << "Enter a number from 1 to " << gameCount << "\n";
+	while (true) {
 		std::cout << "Enter a number from the list\n";
 		std::cin >> chosenGame;
-		if (std::cin.fail())
-		{
+		if (std::cin.fail()) {
 			std::cin.clear();
 			std::cin.ignore(BUFFER_SIZE, '\n');
 			continue;
 		}
-		if (chosenGame >= 1 && chosenGame <= gameCount)
-		{
+		if (chosenGame >= 1 && chosenGame <= gameCount) {
 			break;
 		}
 	}
+	return chosenGame;
+}
+
+void loadGame() {
+	std::ifstream reader("games.txt");
+	int gameCount = countAndListSavedGames(reader);
+	char str[BUFFER_SIZE];
+	std::cout << "There are " << gameCount << " saved games found.\n";
+	if (gameCount == 0) {
+		return;
+	}
+	int chosenGame = chooseGame(reader, gameCount);
 	gameCount = 0;
-	while (read.getline(str, BUFFER_SIZE))
-	{
-		if (strequal("---", str))
-		{
+	while (reader.getline(str, BUFFER_SIZE)) {
+		if (strequal("---", str)) {
 			gameCount++;
 		}
-		if (gameCount == chosenGame)
-		{
+		if (gameCount == chosenGame) {
 			break;
 		}
 	}
-	read.getline(str, BUFFER_SIZE);
+	reader.getline(str, BUFFER_SIZE);
 	int rows, cols, turns;
-	read >> rows >> cols >> turns;
+	reader >> rows >> cols >> turns;
 	char** board = initialiseBoard(rows, cols);
 	Game game = { {}, 0, rows, cols, board };
-	for (size_t i = 0; i < turns; i++)
-	{
+	for (size_t i = 0; i < turns; i++) {
 		int player, x, y;
-		read >> player >> x >> y;
+		reader >> player >> x >> y;
 		playAt(game, x, y);
 	}
-	read.ignore();
+	reader.ignore();
 	startGame(game);
+	reader.close();
 }
 
 void newGame() {
@@ -518,9 +498,13 @@ void newGame() {
 		std::cin.clear();
 		return;
 	}
-	if (m < 2 || n < 2)
-	{
+	if (m < 2 || n < 2) {
 		std::cout << "Board too small!\n";
+		return;
+	}
+	if (m > 15 || n > 15)
+	{
+		std::cout << "Board too big!\n";
 		return;
 	}
 	int rows = m;
@@ -533,34 +517,28 @@ void newGame() {
 void mainMenu() {
 	showWelcomeBoard();
 	showWelcomeText();
-	while (true)
-	{
+	while (true) {
 		char input[INPUT_BUFFER];
 		std::cin >> input;
-		if (strequal("new", input))
-		{
+		if (strequal("new", input)) {
 			newGame();
 		}
 		else if (strequal("load", input))
 		{
 			loadGame();
 		}
-		else if (strequal("help", input))
-		{
-
+		else if (strequal("help", input)) {
+			processHelpCommand();
 		}
-		else if (strequal("exit", input))
-		{
+		else if (strequal("exit", input)) {
 			return;
 		}
-		else
-		{
+		else {
 			std::cout << "Invalid command\n";
 		}
 	}
 }
 
-int main()
-{
+int main() {
 	mainMenu();
 }
