@@ -130,7 +130,7 @@ void showWelcomeText() {
 		<< MAIN_COLOR
 		<< "help "
 		<< SECONDARY_COLOR
-		<< "to show all commands\n"	
+		<< "to show all commands\n"
 		<< MAIN_COLOR;
 }
 
@@ -192,18 +192,27 @@ void writeMove(Game& game, int x, int y) {
 	}
 	for (int i = 0; i < game.rows; i++)
 	{
-		game.board[i][col] = currentMarker;
+		if (game.board[i][col] == EMPTY_SPACE)
+		{
+			game.board[i][col] = currentMarker;
+		}
 		for (int j = 0; j < game.cols; j++)
 		{
 			if (abs(i - row) == abs(j - col))
 			{
-				game.board[i][j] = currentMarker;
+				if (game.board[i][j] == EMPTY_SPACE)
+				{
+					game.board[i][j] = currentMarker;
+				}
 			}
 		}
 	}
 	for (size_t i = 0; i < game.cols; i++)
 	{
-		game.board[row][i] = currentMarker;
+		if (game.board[row][i] == EMPTY_SPACE)
+		{
+			game.board[row][i] = currentMarker;
+		}
 	}
 	game.board[row][col] = game.turns % 2 == 0 ? '1' : '2';
 	writeHistory(game.history, player, x, y);
