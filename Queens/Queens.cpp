@@ -20,11 +20,11 @@ const int BUFFER_SIZE = 128;
 const char PLAYER_1_MARKER = '*';
 const char PLAYER_2_MARKER = '+';
 const char EMPTY_SPACE = ' ';
-
+const char MAIN_COLOR[] = "\033[38;2;255;165;0m";
+const char SECONDARY_COLOR[] = "\033[0;96m";
 const char DEFAULT_COLOR[] = "\033[0m";
-const char CYAN_COLOR[] = "\033[0;36m";
+const char BOARD_COLOR[] = "\033[0;90m";
 const char BLINKING_YELLOW[] = "\033[1;5;33m";
-const char GREEN_COLOR[] = "\033[1;32m";
 
 struct Move {
 	int player;
@@ -45,16 +45,93 @@ void resetColor() {
 	std::cout << DEFAULT_COLOR;
 }
 
+void boardColor() {
+	std::cout << BOARD_COLOR;
+}
+
+void mainColor() {
+	std::cout << MAIN_COLOR;
+}
+
 void setColor1() {
-	std::cout << CYAN_COLOR;
+	std::cout << MAIN_COLOR;
 }
 
 void setColor2() {
-	std::cout << GREEN_COLOR;
+	std::cout << SECONDARY_COLOR;
 }
 
 void setBlinking() {
 	std::cout << BLINKING_YELLOW;
+}
+
+void showWelcomeBoard() {
+	char matrix[2][9] = { {'*' , '1', '*', '+', '*', '+', '*', '*', '*'},
+						  {'*', '+', '*', '+' , '2', '+', '+', '+', '+'} };
+	for (size_t i = 0; i < 2; i++)
+	{
+		boardColor();
+		std::cout << "  ";
+		for (size_t i = 0; i < 9; i++)
+		{
+			std::cout << "+---";
+		}
+		std::cout << "+\n";
+		setColor2();
+		std::cout << i;
+		boardColor();
+		std::cout << (i < 10 ? " " : "");
+		for (size_t j = 0; j < 9; j++)
+		{
+			std::cout << "| ";
+			if (matrix[i][j] == PLAYER_1_MARKER || matrix[i][j] == '1')
+			{
+				setColor2();
+			}
+			else
+			{
+				setColor1();
+			}
+			std::cout << matrix[i][j];
+			boardColor();
+			std::cout << " ";
+		}
+		std::cout << "|\n";
+	}
+	std::cout << "  ";
+	for (size_t i = 0; i < 9; i++)
+	{
+		std::cout << "+---";
+	}
+	std::cout << "+\n";
+}
+
+void showWelcomeText() {
+	std::cout
+		<< BOARD_COLOR
+		<< "  =========="
+		<< MAIN_COLOR
+		<< "WELCOME TO QUEENS!"
+		<< BOARD_COLOR
+		<< "=========\n"
+		<< SECONDARY_COLOR
+		<< "Start by creating a new board\n"
+		<< "Type "
+		<< MAIN_COLOR
+		<< "new N M "
+		<< SECONDARY_COLOR
+		<< "to create a new N x M board\n"
+		<< "Type "
+		<< MAIN_COLOR
+		<< "Play X Y "
+		<< SECONDARY_COLOR
+		<< "to put a queen at (X,Y) position\n"
+		<< "Use "
+		<< MAIN_COLOR
+		<< "help "
+		<< SECONDARY_COLOR
+		<< "to show all commands\n"	
+		<< MAIN_COLOR;
 }
 
 bool strequal(const char* c1, const char* c2) {
@@ -153,11 +230,13 @@ bool playAt(Game& game, int x, int y) {
 void displayBoard(Game& game) {
 	system("cls");
 	std::cout << "    ";
+	mainColor();
 	for (size_t i = 0; i < game.cols; i++)
 	{
 		std::cout << i;
 		std::cout << (i < 10 ? "   " : "  ");
 	}
+	boardColor();
 	std::cout << "\n";
 	for (size_t i = 0; i < game.rows; i++)
 	{
@@ -166,8 +245,11 @@ void displayBoard(Game& game) {
 		{
 			std::cout << "+---";
 		}
-		std::cout << "+\n" << i;
+		std::cout << "+\n";
+		mainColor();
+		std::cout << i;
 		std::cout << (i < 10 ? " " : "");
+		boardColor();
 		for (size_t j = 0; j < game.cols; j++)
 		{
 			std::cout << "| ";
@@ -180,7 +262,7 @@ void displayBoard(Game& game) {
 				setColor1();
 			}
 			std::cout << game.board[i][j];
-			resetColor();
+			boardColor();
 			std::cout << " ";
 		}
 		std::cout << "|\n";
@@ -191,6 +273,7 @@ void displayBoard(Game& game) {
 		std::cout << "+---";
 	}
 	std::cout << "+\n";
+	mainColor();
 	std::cout << "Player " << (game.turns % 2 ? "2" : "1") << "'s turn\n";
 }
 
@@ -308,7 +391,7 @@ void startGame(Game& game) {
 				char winner = game.turns % 2 == 0 ? '2' : '1';
 				setBlinking();
 				std::cout << "Player " << winner << " won!\n";
-				resetColor();
+				mainColor();
 				printHistory(game);
 				deallocateGameMemory(game);
 				return;
@@ -439,6 +522,8 @@ void newGame() {
 }
 
 void mainMenu() {
+	showWelcomeBoard();
+	showWelcomeText();
 	while (true)
 	{
 		char input[INPUT_BUFFER];
@@ -468,6 +553,5 @@ void mainMenu() {
 
 int main()
 {
-	resetColor();
 	mainMenu();
 }
